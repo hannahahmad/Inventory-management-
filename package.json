@@ -1,0 +1,11 @@
+{
+  "name": "upso1-root-wrapper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npm start --prefix upso-asset-management-main",
+    "dev": "npm run dev --prefix upso-asset-management-main",
+    "test": "npm test --prefix upso-asset-management-main"
+  }
+}

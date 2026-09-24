@@ -1,0 +1,11 @@
+{
+  "name": "upso1-root",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node run.js",
+    "dev": "node run.js",
+    "test": "cd backend && npm test"
+  }
+}
