@@ -1,6 +1,9 @@
 import jwt from 'jsonwebtoken';
 
 export function authenticate(req, res, next) {
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({ error: 'Server authentication misconfigured' });
+  }
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ error: 'Missing token' });
   const token = authHeader.split(' ')[1];

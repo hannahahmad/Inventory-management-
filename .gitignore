@@ -1,23 +1,30 @@
 # Dependencies
 node_modules/
+package-lock.json
 
 # Environment secrets
+.env
 backend/.env
+frontend/.env.local
 
 # SQLite databases
 *.db
 *.db-journal
 
 # Build output
+dist/
 frontend/dist/
 
-# OS files
+# OS metadata & caches
 .DS_Store
 Thumbs.db
+*.tmp
 
-# Strix repo clone (not part of this project)
-strix-repo/
-
-# IDE
+# AI / IDE tooling & scratchpads
+.claude/
+.agents/
 .vscode/
 .idea/
+
+# Internal / Personal Docs
+*.docx

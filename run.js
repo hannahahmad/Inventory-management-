@@ -43,15 +43,18 @@ function runSync(fullCmd, cwd, description) {
   }
 }
 
+import crypto from 'crypto';
+
 async function ensureBackendEnv() {
   const backendDir = path.join(__dirname, 'backend');
   const envPath = path.join(backendDir, '.env');
 
   if (!fs.existsSync(envPath)) {
     log('⚙️  Creating backend .env configuration...', colors.cyan);
+    const randomSecret = crypto.randomBytes(32).toString('hex');
     const defaultEnv = `PORT=4000
 DATABASE_URL="file:./dev.db"
-JWT_SECRET="upso1-super-secret-jwt-key-2026"
+JWT_SECRET="${randomSecret}"
 ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 EXCEL_INVENTORY_PATH=../Inventory Detail (1).xlsx
 EXCEL_LOCATION_PATH=../Location code (2).xlsx
