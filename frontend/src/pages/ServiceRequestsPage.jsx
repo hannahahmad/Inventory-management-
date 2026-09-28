@@ -32,8 +32,13 @@ export default function ServiceRequestsPage() {
 
   const handleStatusChange = (request) => (event) => {
     const status = event.target.value;
+    if ((status === 'Resolved' || status === 'Closed') && !(commentDrafts[request.id] ?? request.resolution)) {
+      setError(`Please enter Remarks/Resolution before marking a complaint as "${status}".`);
+      return;
+    }
     setRequests((prev) => prev.map((r) => (r.id === request.id ? { ...r, status } : r)));
-    updateRequest(request.id, { status });
+    // Always send the current resolution so backend validation has the full picture
+    updateRequest(request.id, { status, resolution: commentDrafts[request.id] ?? request.resolution ?? '' });
   };
 
   const handleCommentInput = (requestId) => (event) => {
@@ -48,8 +53,14 @@ export default function ServiceRequestsPage() {
       return next;
     });
     if (resolution === (request.resolution || '')) return;
+    // If the request is Resolved or Closed, resolution must be non-empty
+    if ((request.status === 'Resolved' || request.status === 'Closed') && !resolution) {
+      setError('Resolution/Remarks are required for Resolved or Closed complaints. Please enter a remark before saving.');
+      return;
+    }
     setRequests((prev) => prev.map((r) => (r.id === request.id ? { ...r, resolution } : r)));
-    updateRequest(request.id, { resolution });
+    // Send status alongside resolution so the backend validation has the full picture
+    updateRequest(request.id, { resolution, status: request.status });
   };
 
   const uniqueValues = useMemo(() => {

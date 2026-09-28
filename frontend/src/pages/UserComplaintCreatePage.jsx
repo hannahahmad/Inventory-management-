@@ -7,6 +7,7 @@ export default function UserComplaintCreatePage() {
   const { assetId } = useParams();
   const user = getStoredUser();
   const [myAssets, setMyAssets] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
     asset_id: assetId || '',
@@ -18,8 +19,15 @@ export default function UserComplaintCreatePage() {
 
   useEffect(() => {
     apiFetch(`/assets?owner_user_id=${user.id}`)
-      .then(setMyAssets)
-      .catch((err) => setError(err.message));
+      .then((assets) => {
+        setMyAssets(assets);
+        // Pre-select the first asset if no assetId param was provided
+        if (!assetId && assets.length > 0) {
+          setForm((prev) => ({ ...prev, asset_id: String(assets[0].id) }));
+        }
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleChange = (field) => (event) => {
@@ -29,6 +37,10 @@ export default function UserComplaintCreatePage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
+    if (!form.asset_id) {
+      setError('Please select an asset to raise a complaint for.');
+      return;
+    }
     try {
       await apiFetch('/service-requests', {
         method: 'POST',
@@ -43,6 +55,8 @@ export default function UserComplaintCreatePage() {
     }
   };
 
+  if (loading) return <div>Loading your assets...</div>;
+
   return (
     <div>
       <div className="page-header">
@@ -50,41 +64,50 @@ export default function UserComplaintCreatePage() {
         <Link className="secondary-button" to="/">Cancel</Link>
       </div>
       {error && <div className="error-message">{error}</div>}
-      <form className="form-block" onSubmit={handleSubmit}>
-        <div className="form-row">
-          <label>Asset</label>
-          <select value={form.asset_id} onChange={handleChange('asset_id')} required>
-            <option value="">Select asset</option>
-            {myAssets.map((asset) => (
-              <option key={asset.id} value={asset.id}>
-                {asset.asset_type?.name || asset.asset_type?.code} - {asset.serial_number}
-              </option>
-            ))}
-          </select>
+
+      {myAssets.length === 0 ? (
+        <div className="card">
+          <p>No assets are currently allotted to you. Please contact your administrator before raising a complaint.</p>
+          <Link className="secondary-button" to="/">Go Back</Link>
         </div>
-        <div className="form-row">
-          <label>Category</label>
-          <input value={form.category} onChange={handleChange('category')} required />
-        </div>
-        <div className="form-row">
-          <label>Priority</label>
-          <select value={form.priority} onChange={handleChange('priority')}>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-            <option value="Critical">Critical</option>
-          </select>
-        </div>
-        <div className="form-row">
-          <label>Title</label>
-          <input value={form.title} onChange={handleChange('title')} required />
-        </div>
-        <div className="form-row">
-          <label>Description</label>
-          <textarea value={form.description} onChange={handleChange('description')} rows="4" />
-        </div>
-        <button type="submit">Create Complaint</button>
-      </form>
+      ) : (
+        <form className="form-block" onSubmit={handleSubmit}>
+          <div className="form-row">
+            <label>Asset</label>
+            <select value={form.asset_id} onChange={handleChange('asset_id')} required>
+              <option value="">Select asset</option>
+              {myAssets.map((asset) => (
+                <option key={asset.id} value={asset.id}>
+                  {asset.asset_type?.name || asset.asset_type?.code} - {asset.serial_number}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-row">
+            <label>Category</label>
+            <input value={form.category} onChange={handleChange('category')} required />
+          </div>
+          <div className="form-row">
+            <label>Priority</label>
+            <select value={form.priority} onChange={handleChange('priority')}>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+          <div className="form-row">
+            <label>Title</label>
+            <input value={form.title} onChange={handleChange('title')} required />
+          </div>
+          <div className="form-row">
+            <label>Description</label>
+            <textarea value={form.description} onChange={handleChange('description')} rows="4" />
+          </div>
+          <button type="submit" disabled={!form.asset_id}>Create Complaint</button>
+        </form>
+      )}
     </div>
   );
 }
+
