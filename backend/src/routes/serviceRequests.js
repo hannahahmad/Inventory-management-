@@ -118,7 +118,7 @@ router.post('/', authenticate, authorize('Administrator', 'AssetManager', 'Locat
     const result = await prisma.$transaction(async (tx) => {
       const request = await tx.serviceRequest.create({ data: preparedData });
 
-      const excelServiceRequestPath = process.env.EXCEL_SERVICE_REQUEST_PATH || '../ServiceRequestReport-639195597679312838 (2).xlsx';
+      const excelServiceRequestPath = process.env.EXCEL_SERVICE_REQUEST_PATH || process.env.EXCEL_SR_PATH || '../ServiceRequestReport-639195597679312838 (2).xlsx';
       await updateWorkbookAtomically(excelServiceRequestPath, async (workbook) => {
         const sheet = workbook.worksheets[0];
         const headerRow = sheet.getRow(1);
@@ -271,7 +271,7 @@ router.patch('/:id', authenticate, authorize('Administrator', 'AssetManager', 'L
     const result = await prisma.$transaction(async (tx) => {
       const request = await tx.serviceRequest.update({ where: { id }, data: updates });
 
-      const excelServiceRequestPath = process.env.EXCEL_SERVICE_REQUEST_PATH || '../ServiceRequestReport-639195597679312838 (2).xlsx';
+      const excelServiceRequestPath = process.env.EXCEL_SERVICE_REQUEST_PATH || process.env.EXCEL_SR_PATH || '../ServiceRequestReport-639195597679312838 (2).xlsx';
       await updateWorkbookAtomically(excelServiceRequestPath, async (workbook) => {
         const sheet = workbook.worksheets[0];
         const headerRow = sheet.getRow(1);

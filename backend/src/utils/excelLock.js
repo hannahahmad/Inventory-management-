@@ -89,7 +89,13 @@ export function getColumnMap(sheet, requiredHeaders = []) {
     throw new Error(`Required columns missing from Excel workbook: ${missing.join(', ')}`);
   }
 
-  return columnMap;
+  return new Proxy(columnMap, {
+    get(target, prop) {
+      if (typeof prop !== 'string') return target[prop];
+      const norm = prop.trim().replace(/\s+/g, ' ').toUpperCase();
+      return target[norm];
+    }
+  });
 }
 
 /**
