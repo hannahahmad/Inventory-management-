@@ -66,19 +66,17 @@ export default function ServiceRequestsPage() {
   const uniqueValues = useMemo(() => {
     const locations = new Set();
     const categories = new Set();
-    const priorities = new Set();
     const statuses = new Set();
     requests.forEach((request) => {
       if (request.location?.location_name) locations.add(request.location.location_name);
       if (request.category) categories.add(request.category);
-      if (request.priority) priorities.add(request.priority);
       if (request.status) statuses.add(request.status);
     });
     const sort = (set) => Array.from(set).sort((a, b) => a.localeCompare(b));
     return {
       locations: sort(locations),
       categories: sort(categories),
-      priorities: sort(priorities),
+      priorities: ['High', 'Medium', 'Low'],
       statuses: sort(statuses),
     };
   }, [requests]);
@@ -88,7 +86,7 @@ export default function ServiceRequestsPage() {
     return requests.filter((request) => {
       if (filters.location && request.location?.location_name !== filters.location) return false;
       if (filters.category && request.category !== filters.category) return false;
-      if (filters.priority && request.priority !== filters.priority) return false;
+      if (filters.priority && (request.priority || '').toLowerCase() !== filters.priority.toLowerCase()) return false;
       if (filters.status && request.status !== filters.status) return false;
       if (search) {
         const haystack = [request.request_id, request.title, request.description, request.reported_by, request.resolution]

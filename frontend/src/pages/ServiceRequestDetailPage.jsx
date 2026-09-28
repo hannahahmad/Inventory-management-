@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../api.js';
 
 const STATUSES = ['New', 'In Progress', 'Resolved', 'Closed'];
-const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
+const PRIORITIES = ['Low', 'Medium', 'High'];
 
 export default function ServiceRequestDetailPage() {
   const { id } = useParams();

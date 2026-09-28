@@ -6,6 +6,13 @@ import { updateWorkbookAtomically, getColumnMap } from '../utils/excelLock.js';
 
 const router = express.Router();
 
+const normalizePriority = (p) => {
+  const norm = String(p || '').trim().toUpperCase();
+  if (norm === 'HIGH' || norm === 'CRITICAL') return 'High';
+  if (norm === 'LOW' || norm === 'VERY LOW' || norm === 'VERYLOW') return 'Low';
+  return 'Medium';
+};
+
 router.get('/', authenticate, async (req, res) => {
   const { status, location_id, priority, mine } = req.query;
   const where = { active: true };
@@ -13,7 +20,7 @@ router.get('/', authenticate, async (req, res) => {
   if (location_id && (req.user.role === 'Administrator' || req.user.role === 'AssetManager')) {
     where.location_id = Number(location_id);
   }
-  if (priority) where.priority = priority;
+  if (priority) where.priority = normalizePriority(priority);
 
   if (req.user.role === 'User') {
     where.submitted_by_user_id = req.user.userId;
@@ -97,7 +104,7 @@ router.post('/', authenticate, authorize('Administrator', 'AssetManager', 'Locat
     location_id: locationId,
     category: data.category.trim(),
     sub_category: data.sub_category?.trim() || null,
-    priority: data.priority.trim(),
+    priority: normalizePriority(data.priority),
     asset_id: data.asset_id ? assetId : undefined,
     reported_by: data.reported_by?.trim() || null,
     submitter: data.submitter?.trim() || null,
@@ -234,6 +241,8 @@ router.patch('/:id', authenticate, authorize('Administrator', 'AssetManager', 'L
       updates[field] = Number(data[field]);
     } else if (field === 'asset_id') {
       updates[field] = data[field] ? Number(data[field]) : null;
+    } else if (field === 'priority') {
+      updates[field] = normalizePriority(data[field]);
     } else if (field === 'expected_resolution_date') {
       updates[field] = data[field] ? new Date(data[field]) : null;
     } else {
